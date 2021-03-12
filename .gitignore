@@ -5,6 +5,8 @@
 # Data files
 notebooks/results
 notebooks/results/*
+data/*
+data
 */data/
 */weights/*
 weights/*
