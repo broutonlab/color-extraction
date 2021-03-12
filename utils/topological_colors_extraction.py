@@ -136,11 +136,28 @@ def extract_common_colors(
     ]
 
     # TODO: Add cover rates evaluation implementation
-    cover_rates = [0] * len(cluster_values)
+    quantized_resized_img = np.array([
+        cluster_values[get_class_index_from_groups(grouping_indexes, clustering.labels_[i])]
+        for i, p in enumerate(resized.reshape((-1, 3)))
+    ]).reshape(resized.shape)
+    
+    total_colors, cover_rates = np.unique(quantized_resized_img.reshape((-1, 3)), axis=0, return_counts=True)
 
-    total_colors = [
-        cluster_values[get_class_index_from_groups(grouping_indexes, g[0])]
-        for g in grouping_indexes
-    ]
+    cover_rates = np.array([
+        count / np.sum(cover_rates) 
+        for count in cover_rates
+    ])
+
+    colors_with_rates = [(total_colors[i], cover_rates[i]) for i in range(len(cover_rates))]
+    colors_with_rates = sorted(colors_with_rates, key=lambda x: x[1], reverse=True)
+
+    total_colors = [tup[0] for tup in colors_with_rates]
+    cover_rates = [tup[1] for tup in colors_with_rates]
+
+
+    # total_colors = [
+    #     cluster_values[get_class_index_from_groups(grouping_indexes, g[0])]
+    #     for g in grouping_indexes
+    # ]
 
     return total_colors, cover_rates
