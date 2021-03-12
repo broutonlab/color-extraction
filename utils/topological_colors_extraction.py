@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
-from matplotlib import pyplot as plt
-from sklearn.cluster import DBSCAN
+from sklearn.cluster import DBSCAN, KMeans
 
 from utils.color_embedding import TFColorEmbedding
 from utils.array_utils import get_median_intensive_value
@@ -54,22 +53,21 @@ def colors_grouping(
 
 
 def get_class_index_from_groups(groups, idx) -> int:
-    if idx == -1:
-        g = max(groups, key=lambda x: len(x))
-        return g[len(g) // 2]
-
     for group in groups:
         if idx in group:
             return group[len(group) // 2]
 
 
 def extract_common_colors(
-        image: np.ndarray, matching_threshold: float = 0.1) -> tuple:
+        image: np.ndarray,
+        matching_threshold: float = 65 / 255,
+        n_jobs: int = 4) -> tuple:
     """
     Extract common colors with cover rates
     Args:
         image: image in RGB HWC uint8 format
-        matching_threshold: matching threshold
+        matching_threshold: matching threshold, more value - fewer colors
+        n_jobs: count of parallel processes
 
     Returns:
         (list with colors in RGB format, list with correspondent cover rates)
@@ -97,7 +95,7 @@ def extract_common_colors(
     )
 
     comp_pixels = umato.UMATO(
-        n_neighbors=500,
+        n_neighbors=250,
         global_n_epochs=50,
         local_n_epochs=50,
         hub_num=300,
@@ -107,7 +105,13 @@ def extract_common_colors(
     clustering = DBSCAN(
         eps=0.2,
         min_samples=20,
-        n_jobs=12
+        n_jobs=n_jobs
+    ).fit(comp_pixels)
+
+    clustering = KMeans(
+        n_clusters=len(set(clustering.labels_)),
+        n_init=10,
+        n_jobs=n_jobs
     ).fit(comp_pixels)
 
     cluster_values = [
@@ -127,7 +131,7 @@ def extract_common_colors(
 
     grouping_indexes = colors_grouping(
         [cl[0] for cl in cluster_values_with_sorted_indexes],
-        65
+        int(matching_threshold * 255)
     )
 
     grouping_indexes = [
@@ -135,29 +139,39 @@ def extract_common_colors(
         for g in grouping_indexes
     ]
 
-    # TODO: Add cover rates evaluation implementation
+    clusters_set = list(set(clustering.labels_))
+
     quantized_resized_img = np.array([
-        cluster_values[get_class_index_from_groups(grouping_indexes, clustering.labels_[i])]
+        cluster_values[
+            get_class_index_from_groups(
+                grouping_indexes,
+                clusters_set.index(clustering.labels_[i])
+            )
+        ]
         for i, p in enumerate(resized.reshape((-1, 3)))
     ]).reshape(resized.shape)
     
-    total_colors, cover_rates = np.unique(quantized_resized_img.reshape((-1, 3)), axis=0, return_counts=True)
+    total_colors, cover_rates = np.unique(
+        quantized_resized_img.reshape((-1, 3)),
+        axis=0,
+        return_counts=True
+    )
 
     cover_rates = np.array([
         count / np.sum(cover_rates) 
         for count in cover_rates
     ])
 
-    colors_with_rates = [(total_colors[i], cover_rates[i]) for i in range(len(cover_rates))]
-    colors_with_rates = sorted(colors_with_rates, key=lambda x: x[1], reverse=True)
+    colors_with_rates = [
+        (total_colors[i], cover_rates[i]) for i in range(len(cover_rates))
+    ]
+    colors_with_rates = sorted(
+        colors_with_rates,
+        key=lambda x: x[1],
+        reverse=True
+    )
 
     total_colors = [tup[0] for tup in colors_with_rates]
     cover_rates = [tup[1] for tup in colors_with_rates]
-
-
-    # total_colors = [
-    #     cluster_values[get_class_index_from_groups(grouping_indexes, g[0])]
-    #     for g in grouping_indexes
-    # ]
 
     return total_colors, cover_rates
