@@ -127,7 +127,7 @@ def extract_common_colors(
 
     grouping_indexes = colors_grouping(
         [cl[0] for cl in cluster_values_with_sorted_indexes],
-        25
+        65
     )
 
     grouping_indexes = [
