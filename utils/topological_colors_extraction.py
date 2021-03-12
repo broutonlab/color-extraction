@@ -125,7 +125,7 @@ def extract_common_colors(image: np.ndarray) -> tuple:
 
     grouping_indexes = colors_grouping(
         [cl[0] for cl in cluster_values_with_sorted_indexes],
-        50
+        25
     )
 
     grouping_indexes = [
