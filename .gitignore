@@ -3,8 +3,6 @@
 *.idea
 
 # Data files
-third_party
-third_party/*
 notebooks/results
 notebooks/results/*
 */data/
