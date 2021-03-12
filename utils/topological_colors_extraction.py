@@ -63,11 +63,13 @@ def get_class_index_from_groups(groups, idx) -> int:
             return group[len(group) // 2]
 
 
-def extract_common_colors(image: np.ndarray) -> tuple:
+def extract_common_colors(
+        image: np.ndarray, matching_threshold: float = 0.1) -> tuple:
     """
     Extract common colors with cover rates
     Args:
         image: image in RGB HWC uint8 format
+        matching_threshold: matching threshold
 
     Returns:
         (list with colors in RGB format, list with correspondent cover rates)
@@ -75,8 +77,8 @@ def extract_common_colors(image: np.ndarray) -> tuple:
     resized = image.copy()
 
     # To optimize algorithm performance
-    if max(resized.shape) > 300:
-        resized_k = 300 / max(resized.shape)
+    if max(resized.shape) > 50:
+        resized_k = 50 / max(resized.shape)
         resized = cv2.resize(
             resized,
             None,
@@ -95,7 +97,7 @@ def extract_common_colors(image: np.ndarray) -> tuple:
     )
 
     comp_pixels = umato.UMATO(
-        n_neighbors=50,
+        n_neighbors=500,
         global_n_epochs=50,
         local_n_epochs=50,
         hub_num=300,
