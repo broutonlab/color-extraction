@@ -171,7 +171,12 @@ def extract_common_colors(
         reverse=True
     )
 
-    total_colors = [tup[0] for tup in colors_with_rates]
+    # TODO: Fix this problem
+    # total_colors = [tup[0] for tup in colors_with_rates]
+    total_colors = [
+        cluster_values[get_class_index_from_groups(grouping_indexes, g[0])]
+        for g in grouping_indexes
+    ]
     cover_rates = [tup[1] for tup in colors_with_rates]
 
     return total_colors, cover_rates
