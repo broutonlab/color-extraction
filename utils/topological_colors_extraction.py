@@ -150,7 +150,7 @@ def extract_common_colors(
         ]
         for i, p in enumerate(resized.reshape((-1, 3)))
     ]).reshape(resized.shape)
-    
+
     total_colors, cover_rates = np.unique(
         quantized_resized_img.reshape((-1, 3)),
         axis=0,
@@ -158,7 +158,7 @@ def extract_common_colors(
     )
 
     cover_rates = np.array([
-        count / np.sum(cover_rates) 
+        count / np.sum(cover_rates)
         for count in cover_rates
     ])
 
@@ -171,12 +171,7 @@ def extract_common_colors(
         reverse=True
     )
 
-    # TODO: Fix this problem
-    # total_colors = [tup[0] for tup in colors_with_rates]
-    total_colors = [
-        cluster_values[get_class_index_from_groups(grouping_indexes, g[0])]
-        for g in grouping_indexes
-    ]
+    total_colors = [tup[0] for tup in colors_with_rates]
     cover_rates = [tup[1] for tup in colors_with_rates]
 
     return total_colors, cover_rates
