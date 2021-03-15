@@ -129,6 +129,7 @@ def extract_common_colors(
     cluster_values_with_sorted_indexes.sort(key=lambda x: x[0].mean(),
                                             reverse=True)
 
+    print(int(matching_threshold * 255))
     grouping_indexes = colors_grouping(
         [cl[0] for cl in cluster_values_with_sorted_indexes],
         int(matching_threshold * 255)
