@@ -17,8 +17,6 @@ def get_colors_pack(img: np.ndarray) -> list:
     for i in range(img.shape[0]):
         for j in range(img.shape[1]):
             cl = img[i, j]
-            if cl[0] == 0 and cl[1] == 0 and cl[2] == 0:
-                continue
             if not check_arr(colors_pack, cl):
                 colors_pack.append(cl)
     return colors_pack
@@ -43,7 +41,7 @@ def multidim_intersect(arr1: np.ndarray, arr2: np.ndarray) -> np.ndarray:
     return intersected.view(arr1.dtype).reshape(-1, arr1.shape[1])
 
 
-def get_unique_colors(img: np.ndarray, counts: bool=False):
+def get_unique_colors(img: np.ndarray, counts: bool = False):
     return np.unique(img.reshape((-1,3)), axis=0, return_counts=counts)
 
 
@@ -59,10 +57,9 @@ def sort_classes(colors: np.ndarray, rates: np.ndarray) -> list:
     return sorted_rates
 
 
-def estimate_measure(pred, truth):
+def IOU(pred, truth):
     assert pred.shape == truth.shape, 'shapes'
 
-    # pred_classes = get_colors_pack(pred)
     colors, rates = get_unique_colors(pred, counts=True)
     
     pred_classes = sort_classes(colors, rates)
@@ -100,8 +97,7 @@ def estimate_measure(pred, truth):
 
         used[max_match_idx] = True
 
-        print(pr_k, '->', max_match_idx)
-
         correct_inter_sum += max_inter
 
     return correct_inter_sum / pred.shape[0] / pred.shape[1]
+
