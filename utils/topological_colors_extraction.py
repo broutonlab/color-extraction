@@ -119,10 +119,11 @@ def extract_common_colors(
     )
 
     clustering = KMeans(
-        n_clusters=len(set(clustering.labels_)) - 1,
+        n_clusters=len([cl for cl in set(clustering.labels_) if cl != -1]),
         init=clusters_centroids,
         n_init=1,
-        n_jobs=n_jobs
+        n_jobs=n_jobs,
+        random_state=42
     ).fit(comp_pixels)
 
     cluster_values = [
