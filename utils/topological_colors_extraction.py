@@ -106,7 +106,7 @@ def extract_common_colors(
 
     clustering = DBSCAN(
         eps=0.2,
-        min_samples=20,
+        min_samples=4,
         n_jobs=n_jobs
     ).fit(comp_pixels)
 
