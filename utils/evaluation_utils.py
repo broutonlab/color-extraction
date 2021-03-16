@@ -35,14 +35,17 @@ def get_equal_indexes(img: np.ndarray, value: np.ndarray) -> list:
 
     return eq_indexes
 
+
 def multidim_intersect(arr1: np.ndarray, arr2: np.ndarray) -> np.ndarray:
-    arr1_view = arr1.view([('',arr1.dtype)]*arr1.shape[1])
-    arr2_view = arr2.view([('',arr2.dtype)]*arr2.shape[1])
+    arr1_view = arr1.view([('', arr1.dtype)] * arr1.shape[1])
+    arr2_view = arr2.view([('', arr2.dtype)] * arr2.shape[1])
     intersected = np.intersect1d(arr1_view, arr2_view)
     return intersected.view(arr1.dtype).reshape(-1, arr1.shape[1])
 
+
 def get_unique_colors(img: np.ndarray, counts: bool=False):
     return np.unique(img.reshape((-1,3)), axis=0, return_counts=counts)
+
 
 def sort_classes(colors: np.ndarray, rates: np.ndarray) -> list:
     all_classes = []
@@ -54,6 +57,7 @@ def sort_classes(colors: np.ndarray, rates: np.ndarray) -> list:
     for color_rates in all_classes:
         sorted_rates.append(color_rates[0])
     return sorted_rates
+
 
 def estimate_measure(pred, truth):
     assert pred.shape == truth.shape, 'shapes'
@@ -85,7 +89,10 @@ def estimate_measure(pred, truth):
                 continue
 
             inter_count = 0
-            inter_count = multidim_intersect(pred_classes_indexes[pr_k], thruth_classes_indexes[gt_k]).shape[0]
+            inter_count = multidim_intersect(
+                np.array(pred_classes_indexes[pr_k]),
+                np.array(truth_classes_indexes[gt_k])
+            ).shape[0]
 
             if inter_count > max_inter:
                 max_inter = inter_count

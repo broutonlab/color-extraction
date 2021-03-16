@@ -99,7 +99,9 @@ def extract_common_colors(
         global_n_epochs=50,
         local_n_epochs=50,
         hub_num=300,
-        verbose=False
+        verbose=False,
+        random_state=42,
+        init='spectral'
     ).fit_transform(pixels)
 
     clustering = DBSCAN(
@@ -108,9 +110,18 @@ def extract_common_colors(
         n_jobs=n_jobs
     ).fit(comp_pixels)
 
+    clusters_centroids = np.array(
+        [
+            comp_pixels[clustering.labels_ == i].mean(axis=0)
+            for i in set(clustering.labels_)
+            if i != -1
+        ]
+    )
+
     clustering = KMeans(
-        n_clusters=len(set(clustering.labels_)),
-        n_init=10,
+        n_clusters=len(set(clustering.labels_)) - 1,
+        init=clusters_centroids,
+        n_init=1,
         n_jobs=n_jobs
     ).fit(comp_pixels)
 
@@ -129,7 +140,6 @@ def extract_common_colors(
     cluster_values_with_sorted_indexes.sort(key=lambda x: x[0].mean(),
                                             reverse=True)
 
-    print(int(matching_threshold * 255))
     grouping_indexes = colors_grouping(
         [cl[0] for cl in cluster_values_with_sorted_indexes],
         int(matching_threshold * 255)
