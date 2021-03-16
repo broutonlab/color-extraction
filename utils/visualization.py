@@ -94,3 +94,53 @@ def draw_colors_vertical_circles(
         center_y += circle_d + thickness * 2 + shifts
 
     return plot_img
+
+
+def draw_colors_horizontal_circles(
+        colors: np.ndarray,
+        size: int = 500) -> np.ndarray:
+    """
+    Draw colors to horizontal line circles
+    Args:
+        colors: colors lint in RGB format
+        size: height of result image
+
+    Returns:
+        Image in RGB HWC uint8 format
+    """
+    circle_d = size
+    shifts = 20
+    thickness = 20
+
+    plot_img = np.zeros(
+        (
+            (circle_d + thickness) * 2,
+            (circle_d + thickness * 2) * len(colors) + shifts * (
+                        len(colors) - 1),
+            4
+        ),
+        dtype=np.uint8
+    )
+
+    center_x = circle_d // 2 + thickness
+    center_y = circle_d // 2 + thickness
+    for i in range(len(colors)):
+        plot_img = cv2.circle(
+            plot_img,
+            (center_x, center_y),
+            circle_d // 2 + thickness // 2,
+            (59, 68, 75, 255),
+            thickness
+        )
+
+        plot_img = cv2.circle(
+            plot_img,
+            (center_x, center_y),
+            circle_d // 2,
+            tuple(colors[i].tolist()) + (255,),
+            -1,
+        )
+
+        center_x += circle_d + thickness * 2 + shifts
+
+    return plot_img
