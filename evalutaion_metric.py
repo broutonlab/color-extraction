@@ -2,6 +2,11 @@ from utils.topological_colors_extraction import *
 from utils.evaluation_utils import *
 import os
 from tqdm import tqdm
+import random
+
+random.seed(42)
+np.random.seed(42)
+
 
 def extract_common_colors_with_image(
         image: np.ndarray,
@@ -46,7 +51,8 @@ def extract_common_colors_with_image(
         hub_num=300,
         verbose=False,
         random_state=42,
-        init='spectral'
+        init='spectral',
+        low_memory=True
     ).fit_transform(pixels)
 
     clustering = DBSCAN(
@@ -96,7 +102,6 @@ def extract_common_colors_with_image(
         for g in grouping_indexes
     ]
 
-
     clusters_set = list(set(clustering.labels_))
 
     quantized_resized_img = np.array([
@@ -140,7 +145,7 @@ color_embedding_model = TFColorEmbedding()
 originals_path = './evaluation_data/images/'
 ground_truth_path = './evaluation_data/masks/'
 print(f'Total amount of evaluation images:{len(os.listdir(originals_path))}')
-measure = []
+measure = []  # for the mean value
 for img_path in tqdm(os.listdir(originals_path)):
     img = cv2.imread(os.path.join(originals_path, img_path), cv2.IMREAD_COLOR)
     if img is None:
@@ -170,5 +175,5 @@ for img_path in tqdm(os.listdir(originals_path)):
     print(f'mIOU = {metric}, for {os.path.join(originals_path, img_path)}')
     measure.append(metric)
 
-print('Mean value for all data = ', round(sum(measure) / len(measure)), 3)
+print('Mean IOU for all images = ', round(sum(measure) / len(measure), 3))
 
