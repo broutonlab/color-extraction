@@ -1,7 +1,7 @@
 from utils.topological_colors_extraction import *
 from utils.evaluation_utils import *
 import os
-
+from tqdm import tqdm
 
 def extract_common_colors_with_image(
         image: np.ndarray,
@@ -134,13 +134,14 @@ def extract_common_colors_with_image(
 
     return total_colors, cover_rates, quantized_resized_img
 
+
 color_embedding_model = TFColorEmbedding()
 
 originals_path = './evaluation_data/images/'
 ground_truth_path = './evaluation_data/masks/'
 print(f'Total amount of evaluation images:{len(os.listdir(originals_path))}')
 measure = []
-for img_path in (os.listdir(originals_path)):
+for img_path in tqdm(os.listdir(originals_path)):
     img = cv2.imread(os.path.join(originals_path, img_path), cv2.IMREAD_COLOR)
     if img is None:
         raise RuntimeError('Can\'t open image: {}'.format(img_path))
