@@ -23,19 +23,9 @@ def extract_common_colors_with_image(
         (list with colors in RGB format, list with correspondent cover rates, quantized image)
     """
     resized = image.copy()
-    # we don't need to do resize, because mask have a certain size
-
-    # To optimize algorithm performance
-    #     if max(resized.shape) > 50:
-    #         resized_k = 50 / max(resized.shape)
-    #         resized = cv2.resize(
-    #             resized,
-    #             None,
-    #             fx=resized_k,
-    #             fy=resized_k,
-    #             interpolation=cv2.INTER_CUBIC
-    #         )
-    #     color_embedding_model = TFColorEmbedding()
+    # for correct comparison predicted and ground truth images
+    # at this stage we will not change the size of the images, because masks are of a fixed size, i.e.
+    # image_size = mask_size
 
     pixels = np.array(
         [
