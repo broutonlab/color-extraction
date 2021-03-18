@@ -3,21 +3,30 @@ from utils.evaluation_utils import *
 import os
 from tqdm import tqdm
 import random
+import argparse
 
 random.seed(42)
 np.random.seed(42)
 
 
+def create_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-l', '--low_memory', default=False)
+    return parser
+
+
 def extract_common_colors_with_image(
         image: np.ndarray,
         matching_threshold: float = 65 / 255,
-        n_jobs: int = 4) -> tuple:
+        n_jobs: int = 4,
+        low_memory: bool = False) -> tuple:
     """
     Extract common colors with cover rates
     Args:
         image: image in RGB HWC uint8 format
         matching_threshold: matching threshold, more value - fewer colors
         n_jobs: count of parallel processes
+        low_memory: parameter for UMATO inference, whether to pursue lower memory NN-descent, default=False
 
     Returns:
         (list with colors in RGB format, list with correspondent cover rates, quantized image)
@@ -42,7 +51,7 @@ def extract_common_colors_with_image(
         verbose=False,
         random_state=42,
         init='spectral',
-        low_memory=True
+        low_memory=low_memory
     ).fit_transform(pixels)
 
     clustering = DBSCAN(
@@ -130,40 +139,44 @@ def extract_common_colors_with_image(
     return total_colors, cover_rates, quantized_resized_img
 
 
-color_embedding_model = TFColorEmbedding()
+if __name__ == "__main__":
+    parser = create_parser()
+    memory = parser.parse_args(sys.argv[1:])
 
-originals_path = './evaluation_data/images/'
-ground_truth_path = './evaluation_data/masks/'
-print(f'Total amount of evaluation images:{len(os.listdir(originals_path))}')
-measure = []  # for the mean value
-for img_path in tqdm(os.listdir(originals_path)):
-    img = cv2.imread(os.path.join(originals_path, img_path), cv2.IMREAD_COLOR)
-    if img is None:
-        raise RuntimeError('Can\'t open image: {}'.format(img_path))
-    img = cv2.cvtColor(img[..., :3], cv2.COLOR_BGR2RGB)
-    try:
-        true_path = (os.path.join(ground_truth_path, img_path[:-3] + 'bmp'))
-        gr = cv2.cvtColor(
-            cv2.imread(
-                true_path,
-                cv2.IMREAD_COLOR
-            ),
-            cv2.COLOR_BGR2RGB
-        )
-    except:
-        true_path = (os.path.join(ground_truth_path, img_path))
-        gr = cv2.cvtColor(
-            cv2.imread(
-                true_path,
-                cv2.IMREAD_COLOR
-            ),
-            cv2.COLOR_BGR2RGB
-        )
+    color_embedding_model = TFColorEmbedding()
 
-    total_colors, cover_rates, result_img = extract_common_colors_with_image(img)
-    metric = IOU(result_img, gr)
-    print(f'mIOU = {metric}, for {os.path.join(originals_path, img_path)}')
-    measure.append(metric)
+    originals_path = './evaluation_data/images/'
+    ground_truth_path = './evaluation_data/masks/'
+    print(f'Total amount of evaluation images:{len(os.listdir(originals_path))}')
+    measure = []  # for the mean value
+    for img_path in tqdm(os.listdir(originals_path)):
+        img = cv2.imread(os.path.join(originals_path, img_path), cv2.IMREAD_COLOR)
+        if img is None:
+            raise RuntimeError('Can\'t open image: {}'.format(img_path))
+        img = cv2.cvtColor(img[..., :3], cv2.COLOR_BGR2RGB)
+        try:
+            true_path = (os.path.join(ground_truth_path, img_path[:-3] + 'bmp'))
+            gr = cv2.cvtColor(
+                cv2.imread(
+                    true_path,
+                    cv2.IMREAD_COLOR
+                ),
+                cv2.COLOR_BGR2RGB
+            )
+        except:
+            true_path = (os.path.join(ground_truth_path, img_path))
+            gr = cv2.cvtColor(
+                cv2.imread(
+                    true_path,
+                    cv2.IMREAD_COLOR
+                ),
+                cv2.COLOR_BGR2RGB
+            )
 
-print('Mean IOU for all images = ', round(sum(measure) / len(measure), 3))
+        total_colors, cover_rates, result_img = extract_common_colors_with_image(img, low_memory=memory.low_memory)
+        metric = IOU(result_img, gr)
+        print(f'mIOU = {metric}, for {os.path.join(originals_path, img_path)}')
+        measure.append(metric)
+
+    print('Mean IOU for all images = ', round(sum(measure) / len(measure), 3))
 
