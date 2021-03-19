@@ -58,24 +58,33 @@ def get_class_index_from_groups(groups, idx) -> int:
             return group[len(group) // 2]
 
 
-def extract_common_colors(
+def extract_principal_colors(
         image: np.ndarray,
         matching_threshold: float = 65 / 255,
-        n_jobs: int = 4) -> tuple:
+        n_jobs: int = 4,
+        low_memory: bool = False,
+        without_resizing: bool = False) -> tuple:
     """
     Extract common colors with cover rates
     Args:
         image: image in RGB HWC uint8 format
         matching_threshold: matching threshold, more value - fewer colors
         n_jobs: count of parallel processes
+        low_memory: use low memory limit
+        without_resizing: use original image size
+
 
     Returns:
-        (list with colors in RGB format, list with correspondent cover rates)
+        (
+            list with colors in RGB format,
+            list with correspondent cover rates,
+            quantized image
+        )
     """
     resized = image.copy()
 
     # To optimize algorithm performance
-    if max(resized.shape) > 50:
+    if not without_resizing and max(resized.shape) > 50:
         resized_k = 50 / max(resized.shape)
         resized = cv2.resize(
             resized,
@@ -101,7 +110,8 @@ def extract_common_colors(
         hub_num=300,
         verbose=False,
         random_state=42,
-        init='spectral'
+        init='spectral',
+        low_memory=low_memory
     ).fit_transform(pixels)
 
     clustering = DBSCAN(
@@ -186,4 +196,4 @@ def extract_common_colors(
     total_colors = [tup[0] for tup in colors_with_rates]
     cover_rates = [tup[1] for tup in colors_with_rates]
 
-    return total_colors, cover_rates
+    return total_colors, cover_rates, quantized_resized_img
