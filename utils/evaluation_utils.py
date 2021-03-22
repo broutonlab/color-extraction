@@ -42,7 +42,7 @@ def multidim_intersect(arr1: np.ndarray, arr2: np.ndarray) -> np.ndarray:
 
 
 def get_unique_colors(img: np.ndarray, counts: bool = False):
-    return np.unique(img.reshape((-1,3)), axis=0, return_counts=counts)
+    return np.unique(img.reshape((-1, 3)), axis=0, return_counts=counts)
 
 
 def sort_classes(colors: np.ndarray, rates: np.ndarray) -> list:
@@ -58,6 +58,14 @@ def sort_classes(colors: np.ndarray, rates: np.ndarray) -> list:
 
 
 def IOU(pred, truth):
+    """
+    IOU metric with classes
+    Args:
+        pred: RGB quantized image
+        truth: ground truth image (mask)
+    Returns:
+        IOU value for the pair image - mask
+    """
     assert pred.shape == truth.shape, 'shapes'
 
     colors, rates = get_unique_colors(pred, counts=True)

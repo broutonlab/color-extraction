@@ -21,8 +21,8 @@ if __name__ == "__main__":
 
     color_embedding_model = TFColorEmbedding()
 
-    originals_path = './evaluation_data/images/'
-    ground_truth_path = './evaluation_data/masks/'
+    originals_path = './evaluation_data/images/'  # originals
+    ground_truth_path = './evaluation_data/masks/'  # masks
     print(f'Total amount of evaluation images:{len(os.listdir(originals_path))}')
     measure = []  # for the mean value
     for img_path in tqdm(os.listdir(originals_path)):
