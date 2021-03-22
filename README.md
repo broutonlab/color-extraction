@@ -78,6 +78,9 @@ To check example inference code open notebook by path:
 To check the algorithm step by step open: `notebooks/pipline_steps.ipynb`, this notebook also contains the running time of each stage 
 #### Evaluation 
 To evaluate the algorithm on all 28 images run: `evaluate_on_data.py --low_memory=False`  
+
 Or open ```notebooks/inference_example.ipynb``` and run   
+
 ```!python evaluate_on_data.py --low_memory=False```   
+
 If system has less then 16 RAM, set `--low_memory=True`, default is `False`
