@@ -42,3 +42,6 @@ sudo docker rm -f ColorExtractionPaperID9041
 ```
 
 ## Usage instructions
+#### Inference
+To check example inference code open notebook by path:
+```notebooks/inference_example.ipynb```
