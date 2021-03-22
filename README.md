@@ -43,7 +43,7 @@ sudo docker rm -f ColorExtractionPaperID9041
 
 ## Usage instructions
 #### Inference
-First of all need open following page in your browser:
+First of all, need open the following page in your browser:
 `localhost:9005/`
 
 To check example inference code open notebook by path:
